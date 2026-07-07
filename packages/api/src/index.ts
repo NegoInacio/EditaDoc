@@ -5,6 +5,7 @@ import { authRoutes } from './routes/auth.js'
 import { profilesRoutes } from './routes/profiles.js'
 import { editalRoutes } from './routes/edital.js'
 import { documentsRoutes } from './routes/documents.js'
+import { templatesRoutes } from './routes/templates.js'
 
 const app = Fastify({ logger: true })
 
@@ -16,6 +17,7 @@ await app.register(authRoutes)
 await app.register(profilesRoutes)
 await app.register(editalRoutes)
 await app.register(documentsRoutes)
+await app.register(templatesRoutes)
 
 app.listen({ port: env.PORT, host: '0.0.0.0' }, (err) => {
   if (err) {
