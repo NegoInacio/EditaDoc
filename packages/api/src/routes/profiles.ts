@@ -4,8 +4,7 @@ import { z } from 'zod'
 import { db } from '../db/index.js'
 import { companyProfiles } from '../db/schema.js'
 import { authenticate } from '../middleware/auth.js'
-
-const PROFILE_LIMITS: Record<string, number> = { free: 1, pro: 5, agency: Infinity }
+import { numericLimit } from '../lib/planLimits.js'
 
 const profileBody = z.object({
   name: z.string().min(1),
@@ -38,7 +37,7 @@ export async function profilesRoutes(app: FastifyInstance) {
       return reply.status(400).send({ error: result.error.flatten().fieldErrors })
     }
 
-    const limit = PROFILE_LIMITS[req.user.plan] ?? 1
+    const limit = numericLimit(req.user.plan, 'profilesMax')
     if (limit !== Infinity) {
       const [{ total }] = await db
         .select({ total: count() })

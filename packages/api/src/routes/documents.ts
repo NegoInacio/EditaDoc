@@ -5,9 +5,8 @@ import { db } from '../db/index.js'
 import { generatedDocuments, templates, companyProfiles } from '../db/schema.js'
 import { authenticate } from '../middleware/auth.js'
 import { fillTemplate, generateDocx } from '../services/docGenerator.js'
+import { numericLimit } from '../lib/planLimits.js'
 import type { TemplateField } from '../db/schema.js'
-
-const MONTHLY_LIMITS: Record<string, number> = { free: 5, pro: Infinity, agency: Infinity }
 
 const generateBody = z.object({
   templateId: z.string().uuid(),
@@ -28,7 +27,7 @@ export async function documentsRoutes(app: FastifyInstance) {
     const { templateId, profileId, manualValues, licitacaoRef } = result.data
 
     // Verificar limite mensal do plano free
-    const limit = MONTHLY_LIMITS[req.user.plan] ?? 5
+    const limit = numericLimit(req.user.plan, 'docsPerMonth')
     if (limit !== Infinity) {
       const startOfMonth = new Date()
       startOfMonth.setDate(1)
