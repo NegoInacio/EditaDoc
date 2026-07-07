@@ -1,4 +1,5 @@
 import Fastify from 'fastify'
+import multipart from '@fastify/multipart'
 import { env } from './env.js'
 import { authRoutes } from './routes/auth.js'
 import { profilesRoutes } from './routes/profiles.js'
@@ -6,6 +7,8 @@ import { editalRoutes } from './routes/edital.js'
 import { documentsRoutes } from './routes/documents.js'
 
 const app = Fastify({ logger: true })
+
+await app.register(multipart)
 
 app.get('/health', async () => ({ status: 'ok' }))
 
