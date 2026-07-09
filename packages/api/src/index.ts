@@ -24,6 +24,9 @@ await app.register(cors, {
 
 await app.register(multipart)
 
+// Responde preflights OPTIONS em qualquer rota
+app.options('*', (_, reply) => { reply.send() })
+
 // Parser adicional para o webhook do MP — guarda raw body antes do JSON.parse
 app.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
   ;(req as unknown as { rawBody: string }).rawBody = body as string
