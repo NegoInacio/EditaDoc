@@ -1,11 +1,16 @@
-import { readFileSync } from 'fs'
-import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
 import Anthropic from '@anthropic-ai/sdk'
 import { env } from '../../env.js'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const systemPrompt = readFileSync(join(__dirname, 'prompts/segmenter.txt'), 'utf-8')
+const systemPrompt = `Você é um especialista em licitações públicas brasileiras. Analise o texto do edital abaixo e identifique todos os blocos que são modelos de documentos a serem preenchidos pelo licitante (declarações, propostas, credenciais, procurações, planilhas de preço etc.).
+
+Para cada bloco encontrado, retorne JSON com:
+- title: nome do documento
+- category: 'declaracao' | 'proposta' | 'credencial' | 'planilha' | 'outro'
+- start_marker: primeiras 80 chars do bloco
+- end_marker: últimas 80 chars do bloco
+- body: texto completo do bloco
+
+Retorne apenas JSON, sem texto adicional. O JSON deve ser um array de objetos.`
 
 const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
 
