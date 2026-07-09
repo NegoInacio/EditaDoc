@@ -1,4 +1,5 @@
 import Fastify from 'fastify'
+import cors from '@fastify/cors'
 import multipart from '@fastify/multipart'
 import { env } from './env.js'
 import { authRoutes } from './routes/auth.js'
@@ -9,6 +10,17 @@ import { templatesRoutes } from './routes/templates.js'
 import { subscriptionsRoutes } from './routes/subscriptions.js'
 
 const app = Fastify({ logger: true })
+
+// CORS antes de qualquer rota
+await app.register(cors, {
+  origin: [
+    'https://edita-doc-api.vercel.app',
+    'http://localhost:5173',
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+})
 
 await app.register(multipart)
 
