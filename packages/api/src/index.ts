@@ -11,23 +11,30 @@ import { subscriptionsRoutes } from './routes/subscriptions.js'
 
 const app = Fastify({ logger: true })
 
-// CORS antes de qualquer rota
+// 1. CORS — primeiro de tudo, antes de qualquer rota ou plugin
 await app.register(cors, {
-  origin: [
-    'https://edita-doc-api.vercel.app',
-    'http://localhost:5173',
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  origin: (origin, cb) => {
+    const allowed = [
+      'https://edita-doc-api.vercel.app',
+      'http://localhost:5173',
+    ]
+    if (!origin || allowed.includes(origin)) {
+      cb(null, true)
+    } else {
+      cb(new Error('Not allowed by CORS'), false)
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
+  preflight: true,
+  strictPreflight: false,
 })
 
+// 2. Multipart (upload de PDF)
 await app.register(multipart)
 
-// Responde preflights OPTIONS em qualquer rota
-app.options('*', (_, reply) => { reply.send() })
-
-// Parser adicional para o webhook do MP — guarda raw body antes do JSON.parse
+// 3. Parser JSON com preservação do raw body para verificação HMAC do webhook MP
 app.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
   ;(req as unknown as { rawBody: string }).rawBody = body as string
   try {
@@ -37,6 +44,7 @@ app.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, 
   }
 })
 
+// 4. Rotas
 app.get('/health', async () => ({ status: 'ok' }))
 
 await app.register(authRoutes)
