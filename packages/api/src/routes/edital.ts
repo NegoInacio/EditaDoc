@@ -60,11 +60,9 @@ export async function editalRoutes(app: FastifyInstance) {
     const parsed = await extractTextFromPdf(buffer)
 
     if (!parsed.ok) {
-      return reply.status(422).send({ error: parsed.error })
+      return reply.status(422).send({ error: `Falha na extração do PDF: ${parsed.error}` })
     }
 
-    // Retorna o texto extraído para o cliente prosseguir com /edital/analyze
-    // ou já roda o pipeline diretamente
     const pipeline = await runEditalPipeline({
       editalText: parsed.data,
       ownerId: req.user.sub,
