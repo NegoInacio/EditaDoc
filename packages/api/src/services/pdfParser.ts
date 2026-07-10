@@ -1,6 +1,6 @@
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist/legacy/build/pdf.mjs'
 
-// Worker desabilitado no Node (não há DOM)
+// Build legado não usa worker thread — necessário para Node.js (sem DOM)
 GlobalWorkerOptions.workerSrc = ''
 
 type Result<T> =
@@ -10,7 +10,12 @@ type Result<T> =
 export async function extractTextFromPdf(buffer: Buffer): Promise<Result<string>> {
   try {
     const uint8 = new Uint8Array(buffer)
-    const pdf = await getDocument({ data: uint8, useWorkerFetch: false, isEvalSupported: false }).promise
+    const pdf = await getDocument({
+      data: uint8,
+      useWorkerFetch: false,
+      isEvalSupported: false,
+      useSystemFonts: true,
+    }).promise
 
     const pages: string[] = []
     for (let i = 1; i <= pdf.numPages; i++) {
